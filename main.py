@@ -5,6 +5,7 @@ import os
 import subprocess
 import shutil
 import sqlite3
+import datetime
 
 # ── Config ────────────────────────────────────────────────────────────────────
 WORKSPACE = os.path.abspath(os.path.dirname(__file__))
@@ -23,6 +24,7 @@ Guidelines:
 - After writing changes to main.py, the server will hot-reload automatically.
 - When installing new packages, add them to pyproject.toml and run `uv sync`.
 - Keep changes focused and explain what you changed and why.
+- Use the `log_journal` tool to document significant changes, design decisions, or problems encountered.
 """.strip()
 
 # ── Database Setup ────────────────────────────────────────────────────────────
@@ -104,6 +106,28 @@ def list_memory() -> str:
         if not keys:
             return "Memory is currently empty."
         return "Stored keys:\n" + "\n".join(f"- {k}" for k in sorted(keys))
+
+
+@agent.tool_plain
+def log_journal(title: str, content: str, tags: str = "") -> str:
+    """
+    Add an entry to the internal journal (JOURNAL.md).
+    Use this to document significant changes, decisions, or lessons learned.
+    `tags` should be a comma-separated list of keywords.
+    """
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    entry = f"## [{timestamp}] {title}\n"
+    if tags:
+        entry += f"**Tags:** {tags}\n\n"
+    entry += f"{content}\n\n---\n\n"
+    
+    journal_path = os.path.join(WORKSPACE, "JOURNAL.md")
+    mode = "a" if os.path.exists(journal_path) else "w"
+    with open(journal_path, mode) as f:
+        if mode == "w":
+            f.write("# Amazo Agent Journal 📓\n\n")
+        f.write(entry)
+    return f"OK: Added journal entry: {title}"
 
 
 # ── Filesystem tools ───────────────────────────────────────────────────────────

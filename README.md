@@ -8,16 +8,18 @@ An autonomous AI agent capable of modifying its own source code, managing its wo
 - **Filesystem Management:** Full access to list, read, write, and delete files within the workspace.
 - **Shell Execution:** Can run arbitrary shell commands to install dependencies (`uv`), run tests, or manage git.
 - **Persistent Memory:** Uses a local SQLite database (`memory.db`) to store and recall information across sessions.
+- **Autobiographical Journal:** Maintains a `JOURNAL.md` to track significant changes and decisions.
 - **Containerized Environment:** Runs inside a Docker container for a consistent and isolated development environment.
 - **Hot-Reloading:** Any changes the agent makes to its code are automatically reloaded by the Uvicorn server.
 
 ## 🛠 Tools
 
-### Memory
-- `remember(key, value)`: Store information.
+### Memory & Journaling
+- `remember(key, value)`: Store information in SQLite.
 - `recall(key)`: Retrieve stored information.
 - `forget(key)`: Delete a memory.
 - `list_memory()`: List all stored keys.
+- `log_journal(title, content, tags)`: Add an entry to the internal `JOURNAL.md`.
 
 ### Filesystem
 - `read_file(path)`: Get file content.
@@ -39,6 +41,6 @@ An autonomous AI agent capable of modifying its own source code, managing its wo
 ## 📈 Roadmap
 
 The agent maintains its own internal roadmap in its persistent memory. Current priorities include:
-1. **Autobiographical Memory:** A journaling system to track progress.
-2. **Semantic Search:** RAG-based indexing for larger projects.
-3. **GitHub Integration:** Automating repository management via the GitHub API.
+1. **Semantic Search:** RAG-based indexing for larger projects.
+2. **GitHub Integration:** Automating repository management via the GitHub API.
+3. **Self-Testing Framework:** Automated verification of code changes.
