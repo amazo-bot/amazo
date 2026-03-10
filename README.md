@@ -1,64 +1,44 @@
-# Agent Template
+# Amazo Agent 🤖
 
-![demo](assets/demo.png)
+An autonomous AI agent capable of modifying its own source code, managing its workspace, and maintaining persistent memory.
 
-This repository is a minimal template for building an AI agent using `pydantic-ai`.
+## 🚀 Capabilities
 
-## **What this template provides**
+- **Self-Modification:** The agent can read, write, and update its own `main.py` and other source files.
+- **Filesystem Management:** Full access to list, read, write, and delete files within the workspace.
+- **Shell Execution:** Can run arbitrary shell commands to install dependencies (`uv`), run tests, or manage git.
+- **Persistent Memory:** Uses a local SQLite database (`memory.db`) to store and recall information across sessions.
+- **Containerized Environment:** Runs inside a Docker container for a consistent and isolated development environment.
+- **Hot-Reloading:** Any changes the agent makes to its code are automatically reloaded by the Uvicorn server.
 
-- A simple `Agent` configured in `main.py`.
-- A small example tool (`roll_dice`) demonstrating how to expose functions to the agent.
-- A browser-based chat UI
+## 🛠 Tools
 
-### **Requirements**
+### Memory
+- `remember(key, value)`: Store information.
+- `recall(key)`: Retrieve stored information.
+- `forget(key)`: Delete a memory.
+- `list_memory()`: List all stored keys.
 
-- Python 3.13 or newer
-- Provider API credentials (e.g. Google, Anthropic, or OpenAI keys)
+### Filesystem
+- `read_file(path)`: Get file content.
+- `write_file(path, content)`: Create or update files.
+- `list_directory(path)`: Explore the workspace.
+- `delete_file(path)`: Remove files or directories.
 
-## **Create a repository from this template & setup**
+### System
+- `run_shell(command)`: Execute terminal commands.
+- `roll_dice()`: A simple utility for random numbers.
 
-Follow these numbered steps to create a new repository from the template (web) and set up locally:
+## 📦 Getting Started
 
-1. On GitHub, open this template repository and click "Use this template" → "Create a new repository". Give the new repo a name and create it under your account or organization.
+1. Ensure Docker is installed.
+2. Configure your `.env` file with `GOOGLE_API_KEY` (or other model providers) and `GITHUB_TOKEN`.
+3. Run `./run_interface.sh` to build the container and start the agent.
+4. Access the chat interface at `http://localhost:8000`.
 
-2. Clone your newly-created repository and change into the project directory (replace the URL with your repo's clone URL):
+## 📈 Roadmap
 
-```bash
-git clone https://github.com/{your-name}/{your-repo}.git
-cd your-repo
-```
-
-3. Make the helper script executable and run it to create a virtual environment, install dependencies, and start the web UI:
-
-```bash
-chmod +x run_interface.sh
-./run_interface.sh
-```
-
-4. Open http://127.0.0.1:8000 in your browser to interact with the agent.
-
-5. Make changes! The chat window will automatically refresh after saving changes to the agent.
-
-## **LLM API Configuration**
-
-- Create a `.env` file in the project root and add the environment variables required by your chosen provider. Examples (replace values with your keys):
-
-```env
-# For Google Gemini (example)
-GOOGLE_API_KEY=your_google_api_key_here
-
-# For OpenAI (example)
-OPENAI_API_KEY=your_openai_api_key_here
-```
-
-- `main.py` uses `load_dotenv()` so keys in `.env` will be loaded automatically at runtime. Edit the `Agent(...)` line in [main.py](main.py) to choose a different model or provider.
-
-## **Usage**
-
-- Run the helper script to prepare the environment and launch the interface:
-
-```bash
-./run_interface.sh
-```
-
-- Open http://127.0.0.1:8000 in your browser to chat with the agent and try the `roll_dice` tool.
+The agent maintains its own internal roadmap in its persistent memory. Current priorities include:
+1. **Autobiographical Memory:** A journaling system to track progress.
+2. **Semantic Search:** RAG-based indexing for larger projects.
+3. **GitHub Integration:** Automating repository management via the GitHub API.
