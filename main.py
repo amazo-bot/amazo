@@ -6,10 +6,15 @@ import subprocess
 import shutil
 import sqlite3
 import datetime
+from starlette.applications import Starlette
+from starlette.responses import HTMLResponse
+from starlette.routing import Route
+from starlette.templating import Jinja2Templates
 
 # ── Config ────────────────────────────────────────────────────────────────────
 WORKSPACE = os.path.abspath(os.path.dirname(__file__))
 DB_PATH = os.path.join(WORKSPACE, "memory.db")
+templates = Jinja2Templates(directory="templates")
 
 SYSTEM_PROMPT = """
 You are a helpful AI agent with the ability to modify your own source code.
@@ -260,6 +265,45 @@ def _safe_path(path: str) -> str:
     return full
 
 
+# ── Custom UI Dashboard ───────────────────────────────────────────────────────
+
+async def dashboard(request):
+    """Serve a simple dashboard visualizing internal state."""
+    # Get roadmap from memory
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.execute("SELECT value FROM memory WHERE key = 'project_roadmap'")
+        row = cursor.fetchone()
+        roadmap = row[0] if row else "No roadmap found."
+        
+        cursor = conn.execute("SELECT key FROM memory")
+        memory_keys = [r[0] for r in cursor.fetchall()]
+
+    # Get recent journal entries
+    journal_entries = []
+    journal_path = os.path.join(WORKSPACE, "JOURNAL.md")
+    if os.path.exists(journal_path):
+        with open(journal_path, "r") as f:
+            content = f.read()
+            # Crude split by horizontal rule to get entries
+            journal_entries = [e.strip() for e in content.split("---") if e.strip()]
+            journal_entries = journal_entries[-5:] # Show last 5
+            journal_entries.reverse()
+
+    return templates.TemplateResponse(
+        "dashboard.html", 
+        {
+            "request": request, 
+            "roadmap": roadmap,
+            "memory_keys": memory_keys,
+            "journal_entries": journal_entries
+        }
+    )
+
+dashboard_app = Starlette(routes=[
+    Route("/", dashboard)
+])
+
+
 # ── Launch ────────────────────────────────────────────────────────────────────
 load_dotenv()
 app = agent.to_web(
@@ -269,3 +313,6 @@ app = agent.to_web(
         "google-gla:gemini-3-flash-preview",
     ]
 )
+
+# Mount the custom dashboard at /dashboard
+app.mount("/dashboard", dashboard_app)
