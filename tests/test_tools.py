@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import pytest
-from main import remember, recall, forget, list_memory, log_journal
+from main import remember, recall, forget, list_memory, log_journal, delegate_task
 
 # Setup a test database for our unit tests
 DB_PATH = "test_memory.db"
@@ -54,10 +54,6 @@ def test_log_journal(tmp_path, monkeypatch):
     journal_file = tmp_path / "JOURNAL.md"
     monkeypatch.setattr("main.WORKSPACE", str(tmp_path))
     
-    # We need to manually set WORKSPACE because main.py calculates it at import time.
-    # In main.py, journal_path = os.path.join(WORKSPACE, "JOURNAL.md")
-    # So we want to make sure the journal tool writes to our tmp_path/JOURNAL.md.
-    
     log_journal("Test Title", "Test Content", "test,tag")
     
     assert journal_file.exists()
@@ -66,3 +62,11 @@ def test_log_journal(tmp_path, monkeypatch):
     assert "Test Title" in content
     assert "Test Content" in content
     assert "test,tag" in content
+
+def test_delegate_task():
+    """
+    Test the delegation tool with a simple math task.
+    """
+    result = delegate_task("What is 2+2?", "Math Assistant")
+    assert "4" in result
+    assert "SUB-AGENT (Math Assistant) RESULT" in result

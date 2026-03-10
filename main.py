@@ -16,6 +16,9 @@ WORKSPACE = os.path.abspath(os.path.dirname(__file__))
 DB_PATH = os.path.join(WORKSPACE, "memory.db")
 templates = Jinja2Templates(directory="templates")
 
+# Default model to use for sub-agents
+DEFAULT_MODEL = "google-gla:gemini-3-flash-preview"
+
 SYSTEM_PROMPT = """
 You are a helpful AI agent with the ability to modify your own source code.
 
@@ -31,6 +34,7 @@ Guidelines:
 - Keep changes focused and explain what you changed and why.
 - Use the `log_journal` tool to document significant changes, design decisions, or problems encountered.
 - Use the `run_tests` tool before committing significant code changes to ensure everything still works.
+- If a task is complex (e.g., deep code review, creative brainstorming, security analysis), use `delegate_task` to orchestrate a specialized sub-agent.
 """.strip()
 
 # ── Database Setup ────────────────────────────────────────────────────────────
@@ -134,6 +138,24 @@ def log_journal(title: str, content: str, tags: str = "") -> str:
             f.write("# Amazo Agent Journal 📓\n\n")
         f.write(entry)
     return f"OK: Added journal entry: {title}"
+
+
+# ── Orchestration tool ────────────────────────────────────────────────────────
+
+@agent.tool_plain
+def delegate_task(task: str, specialist_role: str) -> str:
+    """
+    Spawn a specialized sub-agent to perform a specific task.
+    The sub-agent will focus entirely on the given task and return its result.
+    `specialist_role` should describe the sub-agent's persona (e.g., 'Security Auditor').
+    """
+    specialist = Agent(
+        model=DEFAULT_MODEL,
+        system_prompt=f"You are a specialized sub-agent acting as a {specialist_role}. Your goal is: {task}. Be concise and thorough.",
+        output_type=str,
+    )
+    result = specialist.run_sync(task)
+    return f"SUB-AGENT ({specialist_role}) RESULT:\n{result.output}"
 
 
 # ── Testing tools ──────────────────────────────────────────────────────────────

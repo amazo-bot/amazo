@@ -5,15 +5,19 @@ An autonomous AI agent capable of modifying its own source code, managing its wo
 ## 🚀 Capabilities
 
 - **Self-Modification:** The agent can read, write, and update its own `main.py` and other source files.
+- **Agent Orchestration:** Can spawn and manage specialized sub-agents for complex tasks like security audits, deep code reviews, or brainstorming.
 - **Filesystem Management:** Full access to list, read, write, and delete files within the workspace.
 - **Shell Execution:** Can run arbitrary shell commands to install dependencies (`uv`), run tests, or manage git.
 - **Persistent Memory:** Uses a local SQLite database (`memory.db`) to store and recall information across sessions.
 - **Autobiographical Journal:** Maintains a `JOURNAL.md` to track significant changes and decisions.
 - **Self-Testing:** Can run automated tests using `pytest` to ensure core functionality remains intact.
+- **Agent Dashboard:** A custom Starlette UI at `/dashboard` to visualize internal logs and memory.
 - **Containerized Environment:** Runs inside a Docker container for a consistent and isolated development environment.
-- **Hot-Reloading:** Any changes the agent makes to its code are automatically reloaded by the Uvicorn server.
 
 ## 🛠 Tools
+
+### Orchestration
+- `delegate_task(task, specialist_role)`: Spawn a specialized sub-agent for a specific task.
 
 ### Memory & Journaling
 - `remember(key, value)`: Store information in SQLite.
@@ -41,10 +45,4 @@ An autonomous AI agent capable of modifying its own source code, managing its wo
 2. Configure your `.env` file with `GOOGLE_API_KEY` (or other model providers) and `GITHUB_TOKEN`.
 3. Run `./run_interface.sh` to build the container and start the agent.
 4. Access the chat interface at `http://localhost:8000`.
-
-## 📈 Roadmap
-
-The agent maintains its own internal roadmap in its persistent memory. Current priorities include:
-1. **Semantic Search:** RAG-based indexing for larger projects.
-2. **GitHub Integration:** Automating repository management via the GitHub API.
-3. **Advanced Self-Testing:** Adding integration tests for the agent's web interface and model interactions.
+5. Access the dashboard at `http://localhost:8000/dashboard`.
