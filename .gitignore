@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+.pytest_cache/
 
 # Virtual environments
 .venv
@@ -14,3 +15,4 @@ wheels/
 
 # Database
 memory.db
+test_memory.db

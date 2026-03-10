@@ -14,3 +14,10 @@ Added a journaling tool to track significant changes and updated the README. Thi
 
 ---
 
+## [2026-03-10 05:45:41] Implemented Self-Testing Framework
+**Tags:** testing,safety,feature
+
+Added pytest, created a tests/ directory with tool tests, and implemented a run_tests tool. This ensures self-modifications are safe and verifiable.
+
+---
+

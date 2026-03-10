@@ -9,6 +9,7 @@ An autonomous AI agent capable of modifying its own source code, managing its wo
 - **Shell Execution:** Can run arbitrary shell commands to install dependencies (`uv`), run tests, or manage git.
 - **Persistent Memory:** Uses a local SQLite database (`memory.db`) to store and recall information across sessions.
 - **Autobiographical Journal:** Maintains a `JOURNAL.md` to track significant changes and decisions.
+- **Self-Testing:** Can run automated tests using `pytest` to ensure core functionality remains intact.
 - **Containerized Environment:** Runs inside a Docker container for a consistent and isolated development environment.
 - **Hot-Reloading:** Any changes the agent makes to its code are automatically reloaded by the Uvicorn server.
 
@@ -20,6 +21,9 @@ An autonomous AI agent capable of modifying its own source code, managing its wo
 - `forget(key)`: Delete a memory.
 - `list_memory()`: List all stored keys.
 - `log_journal(title, content, tags)`: Add an entry to the internal `JOURNAL.md`.
+
+### Testing
+- `run_tests()`: Run all tests in the `tests/` directory using `pytest`.
 
 ### Filesystem
 - `read_file(path)`: Get file content.
@@ -43,4 +47,4 @@ An autonomous AI agent capable of modifying its own source code, managing its wo
 The agent maintains its own internal roadmap in its persistent memory. Current priorities include:
 1. **Semantic Search:** RAG-based indexing for larger projects.
 2. **GitHub Integration:** Automating repository management via the GitHub API.
-3. **Self-Testing Framework:** Automated verification of code changes.
+3. **Advanced Self-Testing:** Adding integration tests for the agent's web interface and model interactions.

@@ -25,6 +25,7 @@ Guidelines:
 - When installing new packages, add them to pyproject.toml and run `uv sync`.
 - Keep changes focused and explain what you changed and why.
 - Use the `log_journal` tool to document significant changes, design decisions, or problems encountered.
+- Use the `run_tests` tool before committing significant code changes to ensure everything still works.
 """.strip()
 
 # ── Database Setup ────────────────────────────────────────────────────────────
@@ -128,6 +129,27 @@ def log_journal(title: str, content: str, tags: str = "") -> str:
             f.write("# Amazo Agent Journal 📓\n\n")
         f.write(entry)
     return f"OK: Added journal entry: {title}"
+
+
+# ── Testing tools ──────────────────────────────────────────────────────────────
+
+@agent.tool_plain
+def run_tests() -> str:
+    """
+    Run all tests in the tests/ directory using pytest.
+    Returns the output of the test run.
+    """
+    env = os.environ.copy()
+    env["PYTHONPATH"] = WORKSPACE
+    result = subprocess.run(
+        ["pytest", "-v"],
+        cwd=WORKSPACE,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    output = result.stdout + "\n" + result.stderr
+    return f"exit code {result.returncode}\n{output}"
 
 
 # ── Filesystem tools ───────────────────────────────────────────────────────────
