@@ -4,9 +4,12 @@ import random
 import os
 import subprocess
 import shutil
+import sqlite3
 
 # ── Config ────────────────────────────────────────────────────────────────────
 WORKSPACE = os.path.abspath(os.path.dirname(__file__))
+DB_PATH = os.path.join(WORKSPACE, "memory.db")
+
 SYSTEM_PROMPT = """
 You are a helpful AI agent with the ability to modify your own source code.
 
@@ -22,6 +25,16 @@ Guidelines:
 - Keep changes focused and explain what you changed and why.
 """.strip()
 
+# ── Database Setup ────────────────────────────────────────────────────────────
+def init_db():
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS memory (key TEXT PRIMARY KEY, value TEXT)"
+        )
+        conn.commit()
+
+init_db()
+
 # ── Agent setup ───────────────────────────────────────────────────────────────
 agent = Agent(
     system_prompt=SYSTEM_PROMPT,
@@ -34,6 +47,63 @@ agent = Agent(
 def roll_dice() -> str:
     """Roll a six-sided die and return the result."""
     return str(random.randint(1, 6))
+
+
+# ── Memory tools ──────────────────────────────────────────────────────────────
+
+@agent.tool_plain
+def remember(key: str, value: str) -> str:
+    """
+    Store a piece of information in persistent memory.
+    If the key already exists, its value will be updated.
+    """
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO memory (key, value) VALUES (?, ?)",
+            (key, value)
+        )
+        conn.commit()
+    return f"OK: remembered '{key}'"
+
+
+@agent.tool_plain
+def recall(key: str) -> str:
+    """
+    Retrieve a piece of information from persistent memory by its key.
+    Returns an error message if the key is not found.
+    """
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.execute("SELECT value FROM memory WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        return f"ERROR: Key '{key}' not found in memory."
+
+
+@agent.tool_plain
+def forget(key: str) -> str:
+    """
+    Remove a piece of information from persistent memory by its key.
+    """
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.execute("DELETE FROM memory WHERE key = ?", (key,))
+        conn.commit()
+        if cursor.rowcount > 0:
+            return f"OK: forgot '{key}'"
+        return f"ERROR: Key '{key}' not found in memory."
+
+
+@agent.tool_plain
+def list_memory() -> str:
+    """
+    List all keys currently stored in persistent memory.
+    """
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.execute("SELECT key FROM memory")
+        keys = [row[0] for row in cursor.fetchall()]
+        if not keys:
+            return "Memory is currently empty."
+        return "Stored keys:\n" + "\n".join(f"- {k}" for k in sorted(keys))
 
 
 # ── Filesystem tools ───────────────────────────────────────────────────────────
